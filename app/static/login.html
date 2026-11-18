@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plex Notify · Iniciar sesión</title>
+<style>
+:root{--bg:#141414;--panel:#1f1f1f;--panel2:#2a2a2a;--line:#333;--fg:#e8e8e8;--mut:#9a9a9a;--acc:#e5a00d;--err:#ef5350}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:radial-gradient(circle at 50% 0%,#2a2210 0%,var(--bg) 55%);color:var(--fg);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+.box{width:100%;max-width:360px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 26px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+h1{margin:0 0 4px;font-size:22px;color:var(--acc);text-align:center}
+p.sub{margin:0 0 22px;text-align:center;color:var(--mut);font-size:13px}
+label{display:block;color:var(--mut);font-size:12px;margin:14px 0 5px}
+input[type=text],input[type=password]{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:11px 12px;font:inherit;outline:none}
+input:focus{border-color:var(--acc)}
+.pw{position:relative}.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--mut);cursor:pointer;font-size:12px;padding:6px}
+.chk{display:flex;align-items:center;gap:8px;margin:16px 0 0;color:var(--fg);font-size:13px;cursor:pointer}
+button.go{width:100%;margin-top:20px;background:var(--acc);color:#111;border:0;border-radius:8px;padding:12px;font-weight:700;font-size:15px;cursor:pointer}
+button.go:disabled{opacity:.6;cursor:wait}
+#err{min-height:20px;margin-top:12px;color:var(--err);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<form class="box" id="f" autocomplete="on">
+  <h1>▶ Plex Notify</h1>
+  <p class="sub">Inicia sesión para continuar</p>
+  <label for="u">Usuario</label>
+  <input id="u" name="username" type="text" autocomplete="username" required autofocus>
+  <label for="p">Contraseña</label>
+  <div class="pw"><input id="p" name="password" type="password" autocomplete="current-password" required>
+    <button type="button" id="show" aria-label="Mostrar contraseña">Mostrar</button></div>
+  <label class="chk"><input type="checkbox" id="r"> Recordarme en este equipo (30 días)</label>
+  <button class="go" id="go" type="submit">Entrar</button>
+  <div id="err" role="alert"></div>
+</form>
+<script>
+const $=s=>document.querySelector(s);
+try{$('#u').value=localStorage.getItem('pn.user')||'';$('#r').checked=localStorage.getItem('pn.remember')==='1';if($('#u').value)$('#p').focus()}catch(e){}
+$('#show').onclick=()=>{const t=$('#p').type==='password';$('#p').type=t?'text':'password';$('#show').textContent=t?'Ocultar':'Mostrar'};
+$('#f').onsubmit=async ev=>{ev.preventDefault();$('#err').textContent='';$('#go').disabled=true;$('#go').textContent='Entrando…';
+  try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:$('#u').value.trim(),password:$('#p').value,remember:$('#r').checked})});
+    if(r.ok){try{localStorage.setItem('pn.user',$('#u').value.trim());localStorage.setItem('pn.remember',$('#r').checked?'1':'0')}catch(e){}
+      location.href='/';return}
+    const j=await r.json().catch(()=>({}));$('#err').textContent=j.detail||('Error '+r.status);$('#p').select()}
+  catch(e){$('#err').textContent='No se pudo conectar con el servidor'}
+  $('#go').disabled=false;$('#go').textContent='Entrar'};
+</script>
+</body>
+</html>

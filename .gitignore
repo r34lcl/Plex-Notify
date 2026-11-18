@@ -1,0 +1,9 @@
+# secretos y datos locales (tokens, contraseñas, usuarios, historial)
+.env
+data/
+*.db
+*.db-*
+*.tar.gz
+__pycache__/
+*.pyc
+.venv/

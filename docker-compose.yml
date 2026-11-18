@@ -1,0 +1,16 @@
+services:
+  plex-notify:
+    build: .
+    container_name: plex-notify
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Plex en la misma máquina; si está en otra, usa su IP: http://192.168.1.10:32400
+      - PLEX_URL=http://host.docker.internal:32400
+      - TZ=America/Santiago
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8092:8000"
+    volumes:
+      - ./data:/data

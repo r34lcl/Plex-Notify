@@ -13,6 +13,7 @@ from email.message import EmailMessage
 import httpx
 
 from . import render
+from .i18n import _
 
 log = logging.getLogger("plex-notify")
 # esperas entre reintentos ante errores de red (segundos)
@@ -23,8 +24,8 @@ async def send_telegram(cfg: dict, msg: dict, poster: bytes | None) -> list[dict
     token = cfg["bot_token"].strip()
     chats = [c.strip() for c in str(cfg["chat_ids"]).replace(";", ",").split(",") if c.strip()]
     if not token or not chats:
-        return [{"channel": "telegram", "ok": False, "error": "falta bot_token o chat_ids"}]
-    markup = json.dumps({"inline_keyboard": [[{"text": "▶ Ver en Plex", "url": msg["link"]}]]})
+        return [{"channel": "telegram", "ok": False, "error": _("falta bot_token o chat_ids")}]
+    markup = json.dumps({"inline_keyboard": [[{"text": "▶ " + _("Ver en Plex"), "url": msg["link"]}]]})
     base = f"https://api.telegram.org/bot{token}"
     out = []
     # lectura generosa: Telegram a veces tarda en responder aunque ya entregó el mensaje
@@ -53,12 +54,12 @@ async def send_telegram(cfg: dict, msg: dict, poster: bytes | None) -> list[dict
                         break
                 except (httpx.ReadTimeout, httpx.WriteTimeout, httpx.RemoteProtocolError, httpx.ReadError) as e:
                     # la petición ya salió: Telegram pudo haberla entregado. No reintentar para no duplicar.
-                    last_err = (f"{type(e).__name__}: sin respuesta de Telegram; puede que el mensaje sí haya "
-                                f"llegado (no se reintenta para no duplicar)")
+                    last_err = f"{type(e).__name__}: " + _("sin respuesta de Telegram; puede que el mensaje sí haya "
+                                                            "llegado (no se reintenta para no duplicar)")
                     break
                 except httpx.TransportError as e:
                     last_err = (f"{type(e).__name__}: {e}" if str(e) else
-                                f"{type(e).__name__} (sin conexión con api.telegram.org)")
+                                f"{type(e).__name__} " + _("(sin conexión con api.telegram.org)"))
                 except Exception as e:  # noqa: BLE001
                     last_err = f"{type(e).__name__}: {e}"
                     break
@@ -68,7 +69,7 @@ async def send_telegram(cfg: dict, msg: dict, poster: bytes | None) -> list[dict
                 await asyncio.sleep(wait)
             res = {"channel": "telegram", "target": chat, "ok": last_err is None, "error": last_err}
             if last_err and attempt:
-                res["error"] = f"{last_err} (tras {attempt + 1} intentos)"
+                res["error"] = last_err + _(" (tras {n} intentos)", n=attempt + 1)
             out.append(res)
     return out
 
@@ -90,14 +91,14 @@ def email_recipients(cfg: dict, section: str | None) -> tuple[list[dict], list[d
             continue
         label = u["username"]
         if not u.get("email"):
-            skipped.append({"label": label, "reason": "sin correo en Plex"})
+            skipped.append({"label": label, "reason": _("sin correo en Plex")})
             continue
         if (cfg.get("respect_access", True) and section and not u.get("all_libraries")
                 and section not in u.get("sections", [])):
-            skipped.append({"label": label, "reason": "sin acceso a esta biblioteca"})
+            skipped.append({"label": label, "reason": _("sin acceso a esta biblioteca")})
             continue
         if section and section in (cfg.get("user_excludes") or {}).get(uid, []):
-            skipped.append({"label": label, "reason": "biblioteca excluida para este usuario"})
+            skipped.append({"label": label, "reason": _("biblioteca excluida para este usuario")})
             continue
         if u["email"].lower() not in seen:
             seen.add(u["email"].lower())
@@ -110,9 +111,9 @@ def _send_email_sync(cfg: dict, msg: dict, poster: bytes | None, section: str | 
     results = [{"channel": "email", "target": x["label"], "ok": True, "skipped": True, "error": None,
                 "note": x["reason"]} for x in skipped]
     if not cfg.get("host"):
-        return results + [{"channel": "email", "ok": False, "error": "falta el servidor SMTP"}]
+        return results + [{"channel": "email", "ok": False, "error": _("falta el servidor SMTP")}]
     if not recipients:
-        return results + [{"channel": "email", "ok": False, "error": "no hay destinatarios para esta biblioteca"}]
+        return results + [{"channel": "email", "ok": False, "error": _("no hay destinatarios para esta biblioteca")}]
     cid = "poster@plexnotify" if poster else None
     html_body = render.email_html(msg, cid, cfg.get("theme", "dark"))
     text_body = render.plain_text(msg)
@@ -131,7 +132,7 @@ def _send_email_sync(cfg: dict, msg: dict, poster: bytes | None, section: str | 
                 s.login(cfg["username"], cfg.get("password", ""))
             break
         except smtplib.SMTPAuthenticationError as e:
-            return results + [{"channel": "email", "ok": False, "error": f"login SMTP: {e}",
+            return results + [{"channel": "email", "ok": False, "error": _("login SMTP: {e}", e=e),
                                "targets": [r["email"] for r in recipients]}]
         except (OSError, smtplib.SMTPException) as e:
             if s:
@@ -141,7 +142,7 @@ def _send_email_sync(cfg: dict, msg: dict, poster: bytes | None, section: str | 
                     pass
             s = None
             if wait is None:
-                return results + [{"channel": "email", "ok": False, "error": f"SMTP: {e} (tras {attempt + 1} intentos)",
+                return results + [{"channel": "email", "ok": False, "error": f"SMTP: {e}" + _(" (tras {n} intentos)", n=attempt + 1),
                                    "targets": [r["email"] for r in recipients]}]
             log.warning("SMTP: %s — reintento %d en %ds", e, attempt + 1, wait)
             time.sleep(wait)
@@ -172,7 +173,7 @@ def _send_apprise_sync(cfg: dict, msg: dict, poster: bytes | None) -> list[dict]
     import apprise
     urls = [u.strip() for u in cfg["urls"].splitlines() if u.strip() and not u.strip().startswith("#")]
     if not urls:
-        return [{"channel": "apprise", "ok": False, "error": "sin URLs"}]
+        return [{"channel": "apprise", "ok": False, "error": _("sin URLs")}]
     out = []
     path = None
     if poster:
@@ -183,12 +184,12 @@ def _send_apprise_sync(cfg: dict, msg: dict, poster: bytes | None) -> list[dict]
         for u in urls:
             a = apprise.Apprise()
             if not a.add(u):
-                out.append({"channel": "apprise", "target": u.split("://")[0], "ok": False, "error": "URL inválida"})
+                out.append({"channel": "apprise", "target": u.split("://")[0], "ok": False, "error": _("URL inválida")})
                 continue
             ok = a.notify(title=f"{msg['emoji']} {msg['headline']}", body=render.markdown(msg),
                           body_format=apprise.NotifyFormat.MARKDOWN, attach=path)
             out.append({"channel": "apprise", "target": u.split("://")[0], "ok": bool(ok),
-                        "error": None if ok else "falló el envío (ver logs)"})
+                        "error": None if ok else _("falló el envío (ver logs)")})
     finally:
         if path:
             os.unlink(path)

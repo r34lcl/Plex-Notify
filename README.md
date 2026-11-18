@@ -1,76 +1,85 @@
 # Plex Notify
 
-Avisa por **Telegram**, **correo** u otros servicios (vía [Apprise](https://github.com/caronc/apprise)) cuando entra algo nuevo a Plex.
+**English** · [Español](README.es.md)
 
-Nació como reemplazo de las notificaciones de Tautulli: entiende qué se subió realmente. Un capítulo suelto se anuncia como un capítulo, no como "serie completa".
+Sends a notification through **Telegram**, **email** or other services (via [Apprise](https://github.com/caronc/apprise)) when something new is added to Plex.
 
-## Qué detecta
+It started as a replacement for Tautulli's notifications. It understands what was actually added: a single episode is announced as a single episode, not as a "complete series".
 
-Espera unos minutos sin novedades de una misma serie (por defecto 5) y recién ahí manda **un solo mensaje** con todo lo que llegó:
+## What it detects
 
-| Caso | Ejemplo de cabecera |
+It waits a few minutes without news from the same series (5 by default) and then sends **a single message** with everything that arrived:
+
+| Case | Example headline |
 |---|---|
-| 1 capítulo | 📺 Nuevo episodio · S02E05 «Título» |
-| Varios capítulos | 📺 10 episodios nuevos · Temporada 3 · E41–E50 |
-| Temporada entera de una vez | 📦 Temporada 4 completa |
-| Capítulo que completa la temporada | 🏁 Temporada 1 completada |
-| Varias temporadas | 📚 50 episodios nuevos en 5 temporadas |
-| Serie nueva en la biblioteca | 🆕 Nueva serie · … |
-| Serie completa con varias temporadas | 🏆 Serie completa · N temporadas |
-| Película | 🎬 Nueva película |
+| 1 episode | 📺 New episode · S02E05 «Title» |
+| Several episodes | 📺 10 new episodes · Season 3 · E41–E50 |
+| A whole season at once | 📦 Season 4 complete |
+| The episode that completes a season | 🏁 Season 1 completed |
+| Several seasons | 📚 50 new episodes in 5 seasons |
+| New series in the library | 🆕 New series · … |
+| Complete series with several seasons | 🏆 Complete series · N seasons |
+| Movie | 🎬 New movie |
 
-El total real de episodios de cada temporada y sus fechas de emisión se consultan en el servicio de metadatos de Plex. Con eso el mensaje indica "5 de 26 · al día", "faltan E03, E07" o "12/12 ✅ completa".
+The real episode count of each season and its air dates come from Plex's metadata service. That way the message can say "5 of 26 · up to date", "missing E03, E07" or "12/12 ✅ complete".
 
-> Las temporadas que Plex no tiene identificadas (`local://`) no traen total: el mensaje solo dice cuántos capítulos hay en Plex.
+> Seasons that Plex has not matched (`local://`) have no total: the message only says how many episodes are in Plex.
 
-## Canales
+## Channels
 
-- **Telegram:** póster, texto, resumen desplegable y botón "▶ Ver en Plex".
-- **Correo (SMTP):** HTML con póster, con tema **Oscuro**, **Claro** o **Automático**.
-  - **Usuarios de Plex:** se eligen de la lista de usuarios con quienes compartes el servidor (se obtiene de plex.tv y se refresca cada 6 h).
-  - **Filtro por biblioteca:** con la opción activada, cada usuario solo recibe avisos de las bibliotecas que tiene compartidas.
-  - **Exclusión por usuario:** toca una biblioteca de una persona para excluirla de sus correos (🔕), aunque tenga acceso.
-  - **Privacidad:** se envía un correo individual por persona, así nadie ve las direcciones de los demás.
-  - **Direcciones adicionales:** reciben todo, sin filtro.
-- **Apprise:** Discord, ntfy, Pushover, Gotify, Slack, etc. Una URL por línea.
+- **Telegram:** poster, text, collapsible summary and a "▶ Watch on Plex" button.
+- **Email (SMTP):** HTML with the poster, in a **Dark**, **Light** or **Automatic** theme.
+  - **Plex users:** pick recipients from the list of users you share the server with (read from plex.tv and refreshed every 6 h).
+  - **Library filter:** with the option enabled, each user only gets notifications for the libraries shared with them.
+  - **Per-user exclusions:** tap a library of a person to exclude it from their emails (🔕), even if they have access.
+  - **Privacy:** one individual email is sent per person, so nobody sees the other addresses.
+  - **Additional addresses:** get everything, unfiltered.
+- **Apprise:** Discord, ntfy, Pushover, Gotify, Slack, etc. One URL per line.
 
-Los envíos fallidos por errores de red se reintentan solos. Desde el Historial se pueden reintentar o reenviar.
+Deliveries that fail because of network errors are retried automatically. They can also be retried or resent from the History tab.
 
-## Instalación
+## Language
 
-Requiere Docker con Docker Compose.
+The web UI and the notifications are available in **English** and **Spanish**. Switch with the **ES | EN** selector in the top bar; the chosen language applies to the web UI and to the notifications sent from then on.
+
+- **Initial language:** set `APP_LANG=en` in `.env`. It is only used the first time.
+- **Text that comes from Plex:** summaries, genres and episode titles are shown in the metadata language of each library, because that is how Plex provides them.
+
+## Installation
+
+Requires Docker with Docker Compose.
 
 ```bash
 git clone https://github.com/r34lcl/Plex-Notify.git
 cd Plex-Notify
 cp .env.example .env
-nano .env                     # completa PLEX_TOKEN y APP_PASSWORD
+nano .env                     # fill in PLEX_TOKEN and APP_PASSWORD (and APP_LANG=en for English)
 docker compose up -d --build
 docker logs -f plex-notify
 ```
 
-Abre `http://<servidor>:8092`, inicia sesión con `APP_USER` / `APP_PASSWORD` y configura los canales en **Configuración**.
-Arriba a la derecha debe aparecer el nombre de tu servidor Plex en verde.
+Open `http://<server>:8092`, sign in with `APP_USER` / `APP_PASSWORD` and set up the channels in **Settings**.
+The name of your Plex server should show up in green at the top right.
 
-Al arrancar por primera vez, la app parte desde "ahora": no notifica lo que ya estaba en Plex.
+On its first start, the app starts from "now": it does not notify what was already in Plex.
 
-### Dirección de Plex
+### Plex address
 
-En `docker-compose.yml`, `PLEX_URL` apunta por defecto a `host.docker.internal`, es decir, a Plex corriendo en la misma máquina.
-Si Plex está en otro equipo, pon su IP (por ejemplo `http://192.168.1.10:32400`) y borra el bloque `extra_hosts`.
+In `docker-compose.yml`, `PLEX_URL` points to `host.docker.internal` by default, meaning Plex runs on the same machine.
+If Plex is on another host, use its IP (for example `http://192.168.1.10:32400`) and remove the `extra_hosts` block.
 
-Para comprobar que se llega a Plex: `curl -s http://192.168.1.10:32400/identity`.
+To check that Plex is reachable: `curl -s http://192.168.1.10:32400/identity`.
 
-### Cómo obtener el PLEX_TOKEN
+### How to get the PLEX_TOKEN
 
-- **Desde Plex Web:** abre cualquier película → `⋯` → **Obtener información** → **Ver XML**. El token es el valor de `X-Plex-Token=` en la URL.
-- **Desde el servidor:** está en `Preferences.xml` de Plex, atributo `PlexOnlineToken`.
+- **From Plex Web:** open any movie → `⋯` → **Get Info** → **View XML**. The token is the value of `X-Plex-Token=` in the URL.
+- **From the server:** it is in Plex's `Preferences.xml`, attribute `PlexOnlineToken`.
 
-Usa el token de la cuenta **dueña** del servidor; con él la app puede leer la lista de usuarios compartidos.
+Use the token of the server's **owner** account; with it the app can read the list of shared users.
 
-### Si el contenedor no tiene salida a internet
+### If the container has no internet access
 
-Si los envíos a Telegram o plex.tv fallan con `ConnectTimeout`, `timed out` o `Errno 97`, pero `curl` desde el servidor funciona, usa la red del servidor directamente:
+If deliveries to Telegram or plex.tv fail with `ConnectTimeout`, `timed out` or `Errno 97`, but `curl` works from the server itself, use the host network directly:
 
 ```yaml
 services:
@@ -86,61 +95,61 @@ services:
       - ./data:/data
 ```
 
-Con `network_mode: host`, la interfaz queda en el puerto `APP_PORT` del servidor (8000 por defecto). Si está ocupado, define otro en `.env` (por ejemplo `APP_PORT=8092`).
+With `network_mode: host`, the web UI listens on the server's `APP_PORT` (8000 by default). If it is taken, set another one in `.env` (for example `APP_PORT=8092`).
 
-> Con la red normal (`ports: "8092:8000"`) **no** definas `APP_PORT`: la app escucharía en otro puerto interno y la interfaz no respondería.
+> With the normal network (`ports: "8092:8000"`) do **not** set `APP_PORT`: the app would listen on a different internal port and the web UI would not respond.
 
-## Uso de la interfaz
+## Using the web UI
 
-- **Historial:** avisos enviados, a quién llegaron, a quién se omitió y por qué, y lo que está esperando a agruparse. "Revisar Plex ahora" fuerza una revisión.
-- **Probar:** elige una subida reciente real y ve cómo quedaría en Telegram o en el correo.
-  - **🧪 Destinos de prueba:** un chat ID de Telegram y un correo que reciben solo las pruebas, nunca los avisos reales.
-  - **Chat ID:** escríbele a @userinfobot en Telegram. Antes, mándale un mensaje a tu bot, si no Telegram no le permite escribirte.
-  - **Envío real:** "Enviar de verdad a los destinos configurados…" está plegado y pide confirmación.
-- **Configuración:** frecuencia de revisión, tiempo de espera para agrupar, bibliotecas, máximo de episodios listados y datos de Telegram, SMTP y Apprise.
+- **History:** sent notifications, who got them, who was skipped and why, and what is waiting to be grouped. "Check Plex now" forces a check.
+- **Test:** pick a real recent upload and see how it would look on Telegram or by email.
+  - **🧪 Test destinations:** a Telegram chat ID and an email address that only get tests, never the real notifications.
+  - **Chat ID:** message @userinfobot on Telegram. First send a message to your bot, otherwise Telegram won't let it write to you.
+  - **Real delivery:** "Really send to the configured destinations…" is collapsed and asks for confirmation.
+- **Settings:** check interval, grouping wait time, libraries, max. episodes listed and the Telegram, SMTP and Apprise settings.
 
-**Máx. episodios listados:** cuántos capítulos se muestran uno por uno con su título; el resto queda como "… y N más". Telegram limita el texto de una foto a 1024 caracteres, así que si no cabe, la app acorta primero el resumen y después la lista.
+**Max. episodes listed:** how many episodes are shown one by one with their title; the rest become "… and N more". Telegram limits a photo caption to 1024 characters, so if it doesn't fit, the app shortens the summary first and then the list.
 
-### Inicio de sesión
+### Sign-in
 
-- **Recordarme** mantiene la sesión 30 días; sin marcarla, dura 12 h.
-- 5 intentos fallidos seguidos bloquean esa IP por 5 minutos.
-- Cambiar `APP_PASSWORD` y aplicar con `docker compose up -d` cierra todas las sesiones.
-- La API también acepta Basic Auth (`curl -u usuario:clave`).
+- **Remember me** keeps the session for 30 days; without it, it lasts 12 h.
+- 5 failed attempts in a row lock that IP out for 5 minutes.
+- Changing `APP_PASSWORD` and applying it with `docker compose up -d` closes every open session.
+- The API also accepts Basic Auth (`curl -u user:password`).
 
-Si vas a exponer la interfaz a internet, ponla detrás de un proxy con HTTPS.
+If you expose the web UI to the internet, put it behind a reverse proxy with HTTPS.
 
-## Archivos
+## Files
 
-| Ruta | Contenido |
+| Path | Contents |
 |---|---|
-| `app/` | Código (FastAPI + SQLite) |
-| `.env` | `PLEX_TOKEN`, `APP_USER`, `APP_PASSWORD` (**secreto**, no se versiona) |
-| `data/plex-notify.db` | Configuración, historial y registro de lo ya notificado. **Contiene tokens y contraseñas**, no se versiona |
+| `app/` | Code (FastAPI + SQLite) |
+| `.env` | `PLEX_TOKEN`, `APP_USER`, `APP_PASSWORD`, `APP_LANG` (**secret**, not versioned) |
+| `data/plex-notify.db` | Settings, history and record of what was already notified. **Contains tokens and passwords**, not versioned |
 
-## Comandos útiles
+## Useful commands
 
 ```bash
-docker compose up -d --build     # levantar / aplicar cambios de código
-docker compose down              # detener
-docker logs -f plex-notify       # ver detecciones y resultados de envíos
+docker compose up -d --build     # start / apply code changes
+docker compose down              # stop
+docker logs -f plex-notify       # see detections and delivery results
 ```
 
-Si cambias algo en `.env`, usa `docker compose up -d`: `restart` no vuelve a leer `.env`.
+If you change something in `.env`, use `docker compose up -d`: `restart` does not re-read `.env`.
 
-## Mover a otro servidor
+## Moving to another server
 
-Toda la configuración vive en `.env` y `data/`. Detén la app, copia la carpeta completa al servidor nuevo (por un medio privado, como `scp`) y levántala ahí. Sigue exactamente donde quedó, y lo que entró a Plex mientras estaba apagada se notifica al arrancar.
+All the configuration lives in `.env` and `data/`. Stop the app, copy the whole folder to the new server (over a private channel, such as `scp`) and start it there. It picks up exactly where it left off, and whatever was added to Plex while it was stopped is notified when it starts.
 
-No dejes las dos copias corriendo a la vez: cada aviso llegaría duplicado.
+Don't keep both copies running at the same time: every notification would arrive twice.
 
-## Licencia
+## License
 
-Plex Notify es software libre bajo la [Licencia Apache 2.0](LICENSE). Puedes usarlo, modificarlo, hacer forks y redistribuirlo, también con fines comerciales, siempre que:
+Plex Notify is free software under the [Apache License 2.0](LICENSE). You can use, modify, fork and redistribute it, including for commercial purposes, as long as you:
 
-- conserves los archivos `LICENSE` y `NOTICE` en tu copia o versión derivada, con el crédito al proyecto original: **Plex Notify de [KqK.cl](https://kqk.cl)** — <https://github.com/r34lcl/Plex-Notify>;
-- indiques en los archivos que modifiques que fueron cambiados.
+- keep the `LICENSE` and `NOTICE` files in your copy or derived work, crediting the original project: **Plex Notify by [KqK.cl](https://kqk.cl)** — <https://github.com/r34lcl/Plex-Notify>;
+- state in the files you modify that they were changed.
 
-Se entrega «tal cual», sin garantías. Ver el texto completo en `LICENSE`.
+It is provided "as is", without warranty. See the full text in `LICENSE`.
 
-Plex Notify no está afiliado a Plex Inc. "Plex" es una marca de sus respectivos dueños.
+Plex Notify is not affiliated with Plex Inc. "Plex" is a trademark of its respective owners.

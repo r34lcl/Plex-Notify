@@ -25,28 +25,30 @@ button.go:disabled{opacity:.6;cursor:wait}
 <body>
 <form class="box" id="f" autocomplete="on">
   <h1>▶ Plex Notify</h1>
-  <p class="sub">Inicia sesión para continuar</p>
-  <label for="u">Usuario</label>
+  <p class="sub" data-t>Inicia sesión para continuar</p>
+  <label for="u" data-t>Usuario</label>
   <input id="u" name="username" type="text" autocomplete="username" required autofocus>
-  <label for="p">Contraseña</label>
+  <label for="p" data-t>Contraseña</label>
   <div class="pw"><input id="p" name="password" type="password" autocomplete="current-password" required>
-    <button type="button" id="show" aria-label="Mostrar contraseña">Mostrar</button></div>
-  <label class="chk"><input type="checkbox" id="r"> Recordarme en este equipo (30 días)</label>
-  <button class="go" id="go" type="submit">Entrar</button>
+    <button type="button" id="show" aria-label="Mostrar contraseña" data-t>Mostrar</button></div>
+  <label class="chk"><input type="checkbox" id="r"> <span data-t>Recordarme en este equipo (30 días)</span></label>
+  <button class="go" id="go" type="submit" data-t>Entrar</button>
   <div id="err" role="alert"></div>
 </form>
+<script src="/i18n.js"></script>
 <script>
 const $=s=>document.querySelector(s);
+tStatic();fetch('/health').then(r=>r.json()).then(j=>{if(j.language&&j.language!==LANG){setLang(j.language);tStatic()}}).catch(()=>{});
 try{$('#u').value=localStorage.getItem('pn.user')||'';$('#r').checked=localStorage.getItem('pn.remember')==='1';if($('#u').value)$('#p').focus()}catch(e){}
-$('#show').onclick=()=>{const t=$('#p').type==='password';$('#p').type=t?'text':'password';$('#show').textContent=t?'Ocultar':'Mostrar'};
-$('#f').onsubmit=async ev=>{ev.preventDefault();$('#err').textContent='';$('#go').disabled=true;$('#go').textContent='Entrando…';
+$('#show').onclick=()=>{const t=$('#p').type==='password';$('#p').type=t?'text':'password';$('#show').textContent=_t(t?'Ocultar':'Mostrar')};
+$('#f').onsubmit=async ev=>{ev.preventDefault();$('#err').textContent='';$('#go').disabled=true;$('#go').textContent=_t('Entrando…');
   try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({username:$('#u').value.trim(),password:$('#p').value,remember:$('#r').checked})});
     if(r.ok){try{localStorage.setItem('pn.user',$('#u').value.trim());localStorage.setItem('pn.remember',$('#r').checked?'1':'0')}catch(e){}
       location.href='/';return}
-    const j=await r.json().catch(()=>({}));$('#err').textContent=j.detail||('Error '+r.status);$('#p').select()}
-  catch(e){$('#err').textContent='No se pudo conectar con el servidor'}
-  $('#go').disabled=false;$('#go').textContent='Entrar'};
+    const j=await r.json().catch(()=>({}));$('#err').textContent=j.detail||_t('Error {n}',{n:r.status});$('#p').select()}
+  catch(e){$('#err').textContent=_t('No se pudo conectar con el servidor')}
+  $('#go').disabled=false;$('#go').textContent=_t('Entrar')};
 </script>
 </body>
 </html>

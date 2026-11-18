@@ -11,6 +11,8 @@ DB_PATH = os.environ.get("DB_PATH", "/data/plex-notify.db")
 _lock = threading.Lock()
 
 DEFAULT_SETTINGS: dict[str, Any] = {
+    # idioma de la interfaz y de los avisos: es | en (valor inicial desde APP_LANG)
+    "language": "en" if os.environ.get("APP_LANG", "").lower().startswith("en") else "es",
     "poll_seconds": 60,
     # espera sin nuevos ítems de la misma serie antes de notificar (agrupa los episodios de una subida)
     "quiet_seconds": 300,

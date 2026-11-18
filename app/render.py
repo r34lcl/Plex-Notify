@@ -4,6 +4,8 @@ from __future__ import annotations
 import html
 import re
 
+from .i18n import _, get_lang
+
 PLACEHOLDER = re.compile(r"^(episode|episodio|capítulo|capitulo)\s*\d+$", re.I)
 
 
@@ -30,10 +32,10 @@ def human_duration(ms: int | None) -> str:
 
 def season_label(s: dict) -> str:
     if s["index"] == 0:
-        return "Especiales"
+        return _("Especiales")
     t = s.get("title") or ""
     if not t or re.fullmatch(r"(season|temporada)\s*\d+", t, re.I):
-        return f"Temporada {s['index']}"
+        return _("Temporada {n}", n=s["index"])
     return t
 
 
@@ -64,40 +66,40 @@ def ep_title(e: dict) -> str:
 def headline(ev: dict) -> tuple[str, str]:
     """(emoji, texto) de la cabecera."""
     if ev["type"] == "movie":
-        return "🎬", "Nueva película"
+        return "🎬", _("Nueva película")
     k = ev["kind"]
     s0 = ev["seasons"][0]
     if k == "series_full":
-        h = ("🏆", f"Serie completa · {len(ev['seasons'])} temporadas")
+        h = ("🏆", _("Serie completa · {n} temporadas", n=len(ev["seasons"])))
     elif k == "multi_season":
-        h = ("📚", f"{ev['episode_count']} episodios nuevos en {len(ev['seasons'])} temporadas")
+        h = ("📚", _("{e} episodios nuevos en {n} temporadas", e=ev["episode_count"], n=len(ev["seasons"])))
     elif k == "season_full":
-        h = ("📦", f"{season_label(s0)} completa")
+        h = ("📦", _("{s} completa", s=season_label(s0)))
     elif k == "season_completed":
-        h = ("🏁", f"{season_label(s0)} completada")
+        h = ("🏁", _("{s} completada", s=season_label(s0)))
     elif k == "episode":
-        h = ("📺", "Nuevo episodio")
+        h = ("📺", _("Nuevo episodio"))
     else:
-        h = ("📺", f"{len(s0['episodes'])} episodios nuevos")
+        h = ("📺", _("{n} episodios nuevos", n=len(s0["episodes"])))
     if ev.get("is_new_show") and k not in ("series_full",):
-        h = ("🆕", "Nueva serie · " + h[1])
+        h = ("🆕", _("Nueva serie · {h}", h=h[1]))
     return h
 
 
 def season_status(s: dict) -> str:
     if s["index"] == 0:
-        return f"{s['in_plex']} especiales en Plex"
+        return _("{n} especiales en Plex", n=s["in_plex"])
     if s["total"]:
         if s["complete"]:
-            return f"{s['total']}/{s['total']} episodios ✅ completa"
-        txt = f"{s['in_plex']} de {s['total']} episodios en Plex"
+            return _("{n}/{n} episodios ✅ completa", n=s["total"])
+        txt = _("{a} de {b} episodios en Plex", a=s["in_plex"], b=s["total"])
         if s.get("caught_up"):
-            txt += f" · al día ({s['aired_total']} emitidos)"
+            txt += _(" · al día ({n} emitidos)", n=s["aired_total"])
         elif s.get("missing"):
             miss = s["missing"]
-            txt += f" · faltan {ranges(miss[:12])}" + ("…" if len(miss) > 12 else "")
+            txt += _(" · faltan {r}", r=ranges(miss[:12])) + ("…" if len(miss) > 12 else "")
         return txt
-    return f"{s['in_plex']} episodios en Plex"
+    return _("{n} episodios en Plex", n=s["in_plex"])
 
 
 def _meta_line(ev: dict) -> list[str]:
@@ -150,7 +152,7 @@ def build(ev: dict, max_list: int = 8) -> dict:
         for blk in blocks[:6]:
             if len(blk) > 1:
                 n = sum(len(x["episodes"]) for x in blk)
-                lines.append(("b", f"Temporadas {blk[0]['index']}–{blk[-1]['index']} completas · {n} episodios"))
+                lines.append(("b", _("Temporadas {a}–{b} completas · {n} episodios", a=blk[0]["index"], b=blk[-1]["index"], n=n)))
                 continue
             s = blk[0]
             eps = s["episodes"]
@@ -160,18 +162,18 @@ def build(ev: dict, max_list: int = 8) -> dict:
                 lines.append(("b", ep_code(s["index"], e["index"]) + (f" · «{t}»" if t else "")))
                 extra = []
                 if e.get("aired"):
-                    extra.append("emitido " + _fmt_date(e["aired"]))
+                    extra.append(_("emitido {d}", d=_fmt_date(e["aired"])))
                 if e.get("duration"):
                     extra.append(human_duration(e["duration"]))
                 if e.get("replacement"):
-                    extra.append("reemplazo/mejor calidad")
+                    extra.append(_("reemplazo/mejor calidad"))
                 if extra:
                     lines.append(("n", " · ".join(extra)))
             elif s["kind"] == "season_full":
-                lines.append(("b", f"{season_label(s)} · {len(eps)} episodios"))
+                lines.append(("b", _("{s} · {n} episodios", s=season_label(s), n=len(eps))))
             else:
                 lines.append(("b", f"{season_label(s)} · {ranges([e['index'] for e in eps])}"
-                                   + (f" ({len(eps)} ep.)" if len(eps) > 1 else "")))
+                                   + (_(" ({n} ep.)", n=len(eps)) if len(eps) > 1 else "")))
                 if len(seasons) == 1 and any(ep_title(e) for e in eps):
                     shown = eps[:max_list]
                     for e in shown:
@@ -179,13 +181,13 @@ def build(ev: dict, max_list: int = 8) -> dict:
                         lines.append(("i", f"E{e['index']:02d}" + (f" · {t}" if t else "")
                                       + (" ↻" if e.get("replacement") else "")))
                     if len(eps) > len(shown):
-                        lines.append(("i", f"… y {len(eps) - len(shown)} más"))
+                        lines.append(("i", _("… y {n} más", n=len(eps) - len(shown))))
             if not (len(seasons) > 1 and s["kind"] == "season_full"):
                 lines.append(("s", season_status(s)))
         if len(blocks) > 6:
-            lines.append(("n", f"… y {len(blocks) - 6} bloques de temporadas más"))
+            lines.append(("n", _("… y {n} bloques de temporadas más", n=len(blocks) - 6)))
         if not ev.get("identified"):
-            lines.append(("n", "⚠️ Serie sin identificar en Plex: no se conoce el total de episodios"))
+            lines.append(("n", _("⚠️ Serie sin identificar en Plex: no se conoce el total de episodios")))
         if ev["kind"] == "episode":
             summary = seasons[0]["episodes"][0].get("summary") or sh.get("summary")
         elif ev["kind"] == "season_full":
@@ -206,7 +208,7 @@ def build(ev: dict, max_list: int = 8) -> dict:
 def _fmt_date(iso: str) -> str:
     try:
         y, m, d = iso.split("-")
-        return f"{d}-{m}-{y}"
+        return iso if get_lang() == "en" else f"{d}-{m}-{y}"
     except ValueError:
         return iso
 
@@ -237,7 +239,7 @@ def telegram_html(msg: dict, limit: int = 1024) -> str:
             else:
                 out.append(esc(text))
         if hidden:
-            out.append(f"  • … y {hidden} más")
+            out.append("  • " + _("… y {n} más", n=hidden))
         if msg["meta"]:
             out.append("\n" + esc("  ·  ".join(msg["meta"])))
         if msg["summary"] and summary_len > 40:
@@ -313,7 +315,7 @@ def email_html(msg: dict, poster_cid: str | None, theme: str = "light", poster_s
         rules = "".join(f".{cls}{{" + ";".join(f"{prop}:{d[key]} !important" for prop, key in props) + "}"
                         for cls, props in _EMAIL_CLASSES.items())
         dark_css = f"@media (prefers-color-scheme: dark){{{rules}}}[data-ogsc] .pn-card{{background:{d['card']} !important}}"
-    return f"""<!doctype html><html><head><meta charset="utf-8">
+    return f"""<!doctype html><html lang="{get_lang()}"><head><meta charset="utf-8">
 <meta name="color-scheme" content="{scheme}"><meta name="supported-color-schemes" content="{scheme}">
 <style>:root{{color-scheme:{scheme};supported-color-schemes:{scheme}}}{dark_css}</style></head>
 <body {st("pn-page", "margin:0;font-family:Segoe UI,Helvetica,Arial,sans-serif")}>
@@ -323,7 +325,7 @@ def email_html(msg: dict, poster_cid: str | None, theme: str = "light", poster_s
 <tr><td style="padding:20px 22px"><table cellpadding="0" cellspacing="0"><tr>{poster}<td valign="top">
 <div {st("pn-title", "font-size:21px;font-weight:700")}>{esc(msg['title'])}</div>
 {''.join(rows)}{meta}</td></tr></table>{summary}
-<div style="margin-top:18px"><a href="{esc(msg['link'])}" {st("pn-btn", "text-decoration:none;padding:10px 18px;border-radius:6px;font-weight:600;display:inline-block")}>▶ Ver en Plex</a></div>
+<div style="margin-top:18px"><a href="{esc(msg['link'])}" {st("pn-btn", "text-decoration:none;padding:10px 18px;border-radius:6px;font-weight:600;display:inline-block")}>▶ {esc(_("Ver en Plex"))}</a></div>
 </td></tr></table></td></tr></table></body></html>"""
 
 
@@ -335,5 +337,5 @@ def markdown(msg: dict) -> str:
         out += ["", "  ·  ".join(msg["meta"])]
     if msg["summary"]:
         out += ["", _trunc(msg["summary"], 500)]
-    out += ["", f"[▶ Ver en Plex]({msg['link']})"]
+    out += ["", f"[▶ {_('Ver en Plex')}]({msg['link']})"]
     return "\n".join(out)

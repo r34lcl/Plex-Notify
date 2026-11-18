@@ -41,56 +41,63 @@ button.chip.ex{background:transparent;color:var(--mut);border-style:dashed;text-
 .testbox{border:1px dashed var(--acc);border-radius:10px;padding:12px;margin-bottom:14px;background:rgba(229,160,13,.06)}
 .btn.danger{border-color:#6b3a3a}.btn.danger:hover{border-color:var(--err)}
 .empty{color:var(--mut);padding:20px;text-align:center}
+.lang{display:inline-flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+.lang svg{width:15px;height:15px;margin:0 3px 0 5px;color:var(--mut);flex:none}
+.lang button{border:0;background:transparent;color:var(--mut);font:inherit;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;cursor:pointer;min-height:24px}
+.lang button[aria-pressed=true]{background:var(--acc);color:#111}
+.lang button:not([aria-pressed=true]):hover{color:var(--fg)}
+.lang button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 </style>
 </head>
 <body>
 <header>
   <h1>▶ Plex Notify</h1>
   <nav>
-    <button data-s="hist" class="on">Historial</button>
-    <button data-s="test">Probar</button>
-    <button data-s="cfg">Configuración</button>
+    <button data-s="hist" class="on" data-t>Historial</button>
+    <button data-s="test" data-t>Probar</button>
+    <button data-s="cfg" data-t>Configuración</button>
   </nav>
   <div id="st">…</div>
-  <button class="btn sec" onclick="logout()" title="Cerrar sesión">Salir</button>
+  <div class="lang" role="group" aria-label="Idioma / Language"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M2 10h16M10 2c2.2 2.3 3.2 5 3.2 8s-1 5.7-3.2 8c-2.2-2.3-3.2-5-3.2-8s1-5.7 3.2-8z"/></svg><button type="button" data-lang="es" aria-pressed="true" title="Español" onclick="setLanguage('es')">ES</button><button type="button" data-lang="en" aria-pressed="false" title="English" onclick="setLanguage('en')">EN</button></div>
+  <button class="btn sec" onclick="logout()" title="Cerrar sesión" data-t>Salir</button>
 </header>
 <main>
 <section id="hist" class="on">
-  <div class="card" id="pendingCard" style="display:none"><h2>⏳ En espera (agrupando la subida)</h2><div id="pending" class="list"></div></div>
-  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2>Notificaciones enviadas</h2>
-    <button class="btn sec" onclick="pollNow()">Revisar Plex ahora</button></div>
+  <div class="card" id="pendingCard" style="display:none"><h2 data-t>⏳ En espera (agrupando la subida)</h2><div id="pending" class="list"></div></div>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2 data-t>Notificaciones enviadas</h2>
+    <button class="btn sec" onclick="pollNow()" data-t>Revisar Plex ahora</button></div>
     <div id="hlist" class="list hist"></div></div>
 </section>
 
 <section id="test">
   <div class="grid2">
-    <div class="card"><h2>Subidas recientes reales</h2><p class="mut">Elige una para ver exactamente cómo quedaría la notificación.</p><div id="recent" class="list"><div class="empty">Cargando…</div></div></div>
-    <div class="card"><h2>Vista previa</h2>
+    <div class="card"><h2 data-t>Subidas recientes reales</h2><p class="mut" data-t>Elige una para ver exactamente cómo quedaría la notificación.</p><div id="recent" class="list"><div class="empty" data-t>Cargando…</div></div></div>
+    <div class="card"><h2 data-t>Vista previa</h2>
       <div class="testbox">
-        <div style="display:flex;justify-content:space-between;align-items:center"><b>🧪 Destinos de prueba</b><span class="mut">solo reciben las pruebas, nunca los avisos reales</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><b data-t>🧪 Destinos de prueba</b><span class="mut" data-t>solo reciben las pruebas, nunca los avisos reales</span></div>
         <div class="row" style="margin-top:6px">
-          <div><label>Chat ID de Telegram</label><input id="tChat" placeholder="123456789 o -100…" autocomplete="off"></div>
-          <div><label>Correo</label><input id="tMail" type="email" placeholder="tu@correo.cl" autocomplete="off"></div>
+          <div><label data-t>Chat ID de Telegram</label><input id="tChat" placeholder="123456789 o -100…" autocomplete="off"></div>
+          <div><label data-t>Correo</label><input id="tMail" type="email" placeholder="tu@correo.cl" autocomplete="off"></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-          <button class="btn" onclick="sendTest(['telegram','email'])">Enviar prueba a ambos</button>
-          <button class="btn sec" onclick="sendTest(['telegram'])">Solo Telegram de prueba</button>
-          <button class="btn sec" onclick="sendTest(['email'])">Solo correo de prueba</button>
+          <button class="btn" onclick="sendTest(['telegram','email'])" data-t>Enviar prueba a ambos</button>
+          <button class="btn sec" onclick="sendTest(['telegram'])" data-t>Solo Telegram de prueba</button>
+          <button class="btn sec" onclick="sendTest(['email'])" data-t>Solo correo de prueba</button>
         </div>
-        <div class="mut" style="margin-top:6px;font-size:12px">¿Tu chat ID? Escríbele a <b>@userinfobot</b> en Telegram. Antes, envíale un mensaje a tu bot (si no, Telegram no le deja escribirte).</div>
+        <div class="mut" style="margin-top:6px;font-size:12px" data-th>¿Tu chat ID? Escríbele a <b>@userinfobot</b> en Telegram. Antes, envíale un mensaje a tu bot (si no, Telegram no le deja escribirte).</div>
       </div>
-      <div id="pvEmpty" class="empty">Selecciona una subida.</div>
+      <div id="pvEmpty" class="empty" data-t>Selecciona una subida.</div>
       <div id="pv" style="display:none">
         <div class="tabs2"><button class="btn sec" onclick="pvTab('tg')">Telegram</button><button class="btn sec" onclick="pvTab('mail')">Correo</button>
-          <select id="mailTheme" style="width:auto;display:none" onchange="setMail()"><option value="dark">Oscuro</option><option value="light">Claro</option><option value="auto">Automático</option></select></div>
-        <div id="pvTg" class="tg"><div class="bubble"><img id="pvImg" alt=""><div class="c" id="pvCap"></div><div class="kb">▶ Ver en Plex</div></div></div>
+          <select id="mailTheme" style="width:auto;display:none" onchange="setMail()"><option value="dark" data-t>Oscuro</option><option value="light" data-t>Claro</option><option value="auto" data-t>Automático</option></select></div>
+        <div id="pvTg" class="tg"><div class="bubble"><img id="pvImg" alt=""><div class="c" id="pvCap"></div><div class="kb">▶ <span data-t>Ver en Plex</span></div></div></div>
         <iframe id="pvMail" style="display:none"></iframe>
-        <details style="margin-top:12px"><summary class="mut" style="cursor:pointer">Enviar de verdad a los destinos configurados…</summary>
+        <details style="margin-top:12px"><summary class="mut" style="cursor:pointer" data-t>Enviar de verdad a los destinos configurados…</summary>
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <button class="btn sec danger" onclick="sendSel('telegram')">Telegram configurado</button>
-          <button class="btn sec danger" onclick="sendSel('apprise')">Apprise configurado</button>
-          <button class="btn sec danger" onclick="sendSel('email')">Correo a todos los destinatarios</button>
-          <button class="btn sec danger" onclick="sendSel()">Todos los canales activos</button>
+          <button class="btn sec danger" onclick="sendSel('telegram')" data-t>Telegram configurado</button>
+          <button class="btn sec danger" onclick="sendSel('apprise')" data-t>Apprise configurado</button>
+          <button class="btn sec danger" onclick="sendSel('email')" data-t>Correo a todos los destinatarios</button>
+          <button class="btn sec danger" onclick="sendSel()" data-t>Todos los canales activos</button>
         </div></details>
         <div id="sendRes" class="mut" style="margin-top:8px"></div>
       </div>
@@ -99,134 +106,139 @@ button.chip.ex{background:transparent;color:var(--mut);border-style:dashed;text-
 </section>
 
 <section id="cfg">
-  <div class="card"><h2>Detección</h2>
+  <div class="card"><h2 data-t>Detección</h2>
     <div class="row">
-      <div><label>Revisar Plex cada (segundos)</label><input id="poll_seconds" type="number"></div>
-      <div><label>Esperar sin cambios antes de notificar (segundos)</label><input id="quiet_seconds" type="number"></div>
-      <div><label>Máx. episodios listados</label><input id="max_episode_list" type="number"></div>
+      <div><label data-t>Revisar Plex cada (segundos)</label><input id="poll_seconds" type="number"></div>
+      <div><label data-t>Esperar sin cambios antes de notificar (segundos)</label><input id="quiet_seconds" type="number"></div>
+      <div><label data-t>Máx. episodios listados</label><input id="max_episode_list" type="number"></div>
     </div>
-    <p class="mut">Cuando subes varios episodios, la app espera a que pase este tiempo sin novedades de esa serie y manda <b>un solo</b> mensaje (1 episodio, varios, o temporada completa).</p>
-    <label>Bibliotecas (ninguna marcada = todas)</label><div id="sections"></div>
-    <label class="chk"><input type="checkbox" id="notify_replacements"> Notificar también re-subidas de episodios ya avisados (mejor calidad)</label>
+    <p class="mut" data-th>Cuando subes varios episodios, la app espera a que pase este tiempo sin novedades de esa serie y manda <b>un solo</b> mensaje (1 episodio, varios, o temporada completa).</p>
+    <label data-t>Bibliotecas (ninguna marcada = todas)</label><div id="sections"></div>
+    <label class="chk"><input type="checkbox" id="notify_replacements"> <span data-t>Notificar también re-subidas de episodios ya avisados (mejor calidad)</span></label>
   </div>
   <div class="card"><h2>Telegram</h2>
-    <label class="chk"><input type="checkbox" id="telegram.enabled"> Activado</label>
-    <div class="row"><div><label>Bot token (@BotFather)</label><input id="telegram.bot_token"></div>
-      <div><label>Chat IDs (separados por coma; grupos/canales con -100…)</label><input id="telegram.chat_ids"></div></div>
-    <label class="chk"><input type="checkbox" id="telegram.silent"> Enviar sin sonido</label>
+    <label class="chk"><input type="checkbox" id="telegram.enabled"> <span data-t>Activado</span></label>
+    <div class="row"><div><label data-t>Bot token (@BotFather)</label><input id="telegram.bot_token"></div>
+      <div><label data-t>Chat IDs (separados por coma; grupos/canales con -100…)</label><input id="telegram.chat_ids"></div></div>
+    <label class="chk"><input type="checkbox" id="telegram.silent"> <span data-t>Enviar sin sonido</span></label>
   </div>
-  <div class="card"><h2>Correo (SMTP)</h2>
-    <label class="chk"><input type="checkbox" id="email.enabled"> Activado</label>
-    <div class="row"><div><label>Servidor</label><input id="email.host" placeholder="smtp.gmail.com"></div>
-      <div><label>Puerto</label><input id="email.port" type="number"></div>
-      <div><label>Seguridad</label><select id="email.security"><option value="starttls">STARTTLS (587)</option><option value="ssl">SSL/TLS (465)</option><option value="none">Ninguna</option></select></div></div>
-    <div class="row"><div><label>Usuario</label><input id="email.username"></div><div><label>Contraseña / app password</label><input id="email.password" type="password"></div></div>
-    <div class="row"><div><label>Remitente</label><input id="email.from"></div><div><label>Direcciones adicionales (coma) — reciben todo</label><input id="email.to"></div>
-      <div><label>Tema del correo</label><select id="email.theme"><option value="dark">Oscuro</option><option value="light">Claro</option><option value="auto">Automático (según el cliente de correo)</option></select></div></div>
-    <div style="display:flex;justify-content:space-between;align-items:end;margin-top:14px"><label style="margin:0">Usuarios con quienes compartes Plex <span id="puUpd"></span></label>
-      <button class="btn sec" type="button" onclick="loadUsers(true)">Actualizar lista</button></div>
-    <div id="plexUsers" class="list" style="margin-top:6px"><div class="empty">Cargando…</div></div>
-    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn sec" type="button" onclick="markUsers(true)">Marcar todos</button><button class="btn sec" type="button" onclick="markUsers(false)">Ninguno</button></div>
-    <p class="mut" style="margin:6px 0 0">Toca una biblioteca de un usuario para <b>excluirla</b> de sus correos (🔕). Las tachadas sin borde son bibliotecas a las que no tiene acceso. Recuerda <b>Guardar</b>.</p>
-    <label class="chk"><input type="checkbox" id="email.respect_access"> Enviar a cada usuario solo avisos de las bibliotecas que tiene compartidas</label>
+  <div class="card"><h2 data-t>Correo (SMTP)</h2>
+    <label class="chk"><input type="checkbox" id="email.enabled"> <span data-t>Activado</span></label>
+    <div class="row"><div><label data-t>Servidor</label><input id="email.host" placeholder="smtp.gmail.com"></div>
+      <div><label data-t>Puerto</label><input id="email.port" type="number"></div>
+      <div><label data-t>Seguridad</label><select id="email.security"><option value="starttls">STARTTLS (587)</option><option value="ssl">SSL/TLS (465)</option><option value="none" data-t>Ninguna</option></select></div></div>
+    <div class="row"><div><label data-t>Usuario</label><input id="email.username"></div><div><label data-t>Contraseña / app password</label><input id="email.password" type="password"></div></div>
+    <div class="row"><div><label data-t>Remitente</label><input id="email.from"></div><div><label data-t>Direcciones adicionales (coma) — reciben todo</label><input id="email.to"></div>
+      <div><label data-t>Tema del correo</label><select id="email.theme"><option value="dark" data-t>Oscuro</option><option value="light" data-t>Claro</option><option value="auto" data-t>Automático (según el cliente de correo)</option></select></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:end;margin-top:14px"><label style="margin:0"><span data-t>Usuarios con quienes compartes Plex</span> <span id="puUpd"></span></label>
+      <button class="btn sec" type="button" onclick="loadUsers(true)" data-t>Actualizar lista</button></div>
+    <div id="plexUsers" class="list" style="margin-top:6px"><div class="empty" data-t>Cargando…</div></div>
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn sec" type="button" onclick="markUsers(true)" data-t>Marcar todos</button><button class="btn sec" type="button" onclick="markUsers(false)" data-t>Ninguno</button></div>
+    <p class="mut" style="margin:6px 0 0" data-th>Toca una biblioteca de un usuario para <b>excluirla</b> de sus correos (🔕). Las tachadas sin borde son bibliotecas a las que no tiene acceso. Recuerda <b>Guardar</b>.</p>
+    <label class="chk"><input type="checkbox" id="email.respect_access"> <span data-t>Enviar a cada usuario solo avisos de las bibliotecas que tiene compartidas</span></label>
   </div>
-  <div class="card"><h2>Otros (Apprise: Discord, ntfy, Pushover, Gotify, Slack, WhatsApp…)</h2>
-    <label class="chk"><input type="checkbox" id="apprise.enabled"> Activado</label>
-    <label>Una URL por línea — <a style="color:var(--acc)" href="https://github.com/caronc/apprise/wiki" target="_blank">formatos</a></label>
+  <div class="card"><h2 data-t>Otros (Apprise: Discord, ntfy, Pushover, Gotify, Slack, WhatsApp…)</h2>
+    <label class="chk"><input type="checkbox" id="apprise.enabled"> <span data-t>Activado</span></label>
+    <label><span data-t>Una URL por línea —</span> <a style="color:var(--acc)" href="https://github.com/caronc/apprise/wiki" target="_blank" data-t>formatos</a></label>
     <textarea id="apprise.urls" placeholder="discord://webhook_id/webhook_token&#10;ntfys://ntfy.sh/mi-tema"></textarea>
   </div>
-  <button class="btn" onclick="saveCfg()">Guardar</button> <span id="saved" class="mut"></span>
+  <button class="btn" onclick="saveCfg()" data-t>Guardar</button> <span id="saved" class="mut"></span>
 </section>
 </main>
+<script src="/i18n.js"></script>
 <script>
 const $=s=>document.querySelector(s);
-const api=async(p,o={})=>{const r=await fetch(p,{headers:{'Content-Type':'application/json'},...o});if(r.status===401){location.href='/login';throw new Error('sesión expirada')}const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||r.status);return j};
+const api=async(p,o={})=>{const r=await fetch(p,{headers:{'Content-Type':'application/json'},...o});if(r.status===401){location.href='/login';throw new Error(_t('sesión expirada'))}const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||r.status);return j};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const ago=t=>{const s=Math.round(Date.now()/1000-t);if(s<60)return 'hace '+s+' s';if(s<3600)return 'hace '+Math.round(s/60)+' min';if(s<86400)return 'hace '+Math.round(s/3600)+' h';return new Date(t*1000).toLocaleString('es-CL')};
+const ago=t=>{const s=Math.round(Date.now()/1000-t),h=v=>_t('hace {v}',{v});if(s<60)return h(s+' s');if(s<3600)return h(Math.round(s/60)+' min');if(s<86400)return h(Math.round(s/3600)+' h');return new Date(t*1000).toLocaleString(LOC)};
+const chName=c=>c==='email'?_t('correo'):c;
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button,section').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('#'+b.dataset.s).classList.add('on');if(b.dataset.s==='test'&&!window._rec)loadRecent()});
 
 async function status(){try{const s=await api('/api/status');
-  const ch=Object.entries(s.channels).filter(([k,v])=>v).map(([k])=>k).join(', ')||'ningún canal activo';
-  $('#st').innerHTML=(s.plex.ok?`<span class="ok">●</span> ${esc(s.plex.name)}`:`<span class="err">● Plex: ${esc(s.plex.error)}</span>`)+` · ${esc(ch)} · revisado ${s.last_poll?ago(s.last_poll):'—'}`+(s.last_error?` · <span class="err">${esc(s.last_error)}</span>`:'');
+  const ch=Object.entries(s.channels).filter(([k,v])=>v).map(([k])=>chName(k)).join(', ')||_t('ningún canal activo');
+  $('#st').innerHTML=(s.plex.ok?`<span class="ok">●</span> ${esc(s.plex.name)}`:`<span class="err">● Plex: ${esc(s.plex.error)}</span>`)+` · ${esc(ch)} · ${_t('revisado {v}',{v:s.last_poll?ago(s.last_poll):'—'})}`+(s.last_error?` · <span class="err">${esc(s.last_error)}</span>`:'');
   $('#pendingCard').style.display=s.pending.length?'':'none';
-  $('#pending').innerHTML=s.pending.map(p=>`<div class="it"><div class="t"><b>${esc(p.group_key)}</b><span class="mut">${p.n} ítem(s) · se envía en ~${Math.max(0,Math.round(s.quiet_seconds-(s.now-p.last_seen)))} s</span></div></div>`).join('');
-}catch(e){$('#st').textContent='error: '+e.message}}
+  $('#pending').innerHTML=s.pending.map(p=>`<div class="it"><div class="t"><b>${esc(p.group_key)}</b><span class="mut">${_t('{n} ítem(s) · se envía en ~{s} s',{n:p.n,s:Math.max(0,Math.round(s.quiet_seconds-(s.now-p.last_seen)))})}</span></div></div>`).join('');
+}catch(e){$('#st').textContent=_t('error: {e}',{e:e.message})}}
 
 async function loadHist(){const h=await api('/api/notifications');
   $('#hlist').innerHTML=h.length?h.map(n=>{const real=n.results.filter(r=>!r.skipped),ok=real.filter(r=>r.ok).length,bad=real.filter(r=>!r.ok),sk=n.results.filter(r=>r.skipped);
-    const sent=real.filter(r=>r.ok).map(r=>r.channel+' → '+r.target).join('\n');
-    return `<div class="it" onclick="this.classList.toggle('open')"><div class="t"><b>${esc(n.title)}</b><span class="mut">${n.results.some(r=>r.test)?'<span class="pill" style="background:#4a3a10;color:var(--acc)">🧪 prueba</span> ':''}${esc(n.headline)} · ${ago(n.created)}</span>
-    <pre>${esc(n.text)}${sent?'\n\n✔ '+esc(sent).replaceAll('\n','\n✔ '):''}${sk.length?'\n\n⏭ omitidos: '+esc(sk.map(r=>r.target+' ('+r.note+')').join(', ')):''}${bad.length?'\n\n⚠ '+esc(bad.map(r=>r.channel+' '+(r.target||'')+': '+r.error).join('\n⚠ ')):''}</pre></div>
-    <span class="pill ${bad.length?'err':'ok'}">${real.length?ok+'/'+real.length+' enviados':'sin canales'}</span>
-    ${bad.length?`<button class="btn" onclick="event.stopPropagation();retry(${n.id},this)">Reintentar fallidos</button>`:''}
-    <button class="btn sec" onclick="event.stopPropagation();resend(${n.id})">Reenviar</button></div>`}).join(''):'<div class="empty">Aún no hay notificaciones. Las subidas nuevas a Plex aparecerán aquí.</div>'}
-async function resend(id){if(!confirm('Se reenviará por TODOS los canales activos y a TODOS los destinatarios (incluso quienes ya lo recibieron). ¿Continuar?'))return;await api('/api/resend/'+id,{method:'POST'});alert('Reenviado')}
-async function retry(id,b){b.disabled=true;b.textContent='Reintentando…';try{const n=await api('/api/retry/'+id,{method:'POST'});
-  const bad=n.results.filter(r=>!r.ok&&!r.skipped);alert(bad.length?'Siguen fallando:\n'+bad.map(r=>r.channel+' '+(r.target||'')+': '+r.error).join('\n'):'Listo: se envió a los destinos que habían fallado.')}
-  catch(e){alert('Error: '+e.message)}loadHist()}
+    const sent=real.filter(r=>r.ok).map(r=>chName(r.channel)+' → '+r.target).join('\n');
+    return `<div class="it" onclick="this.classList.toggle('open')"><div class="t"><b>${esc(n.title)}</b><span class="mut">${n.results.some(r=>r.test)?'<span class="pill" style="background:#4a3a10;color:var(--acc)">'+_t('🧪 prueba')+'</span> ':''}${esc(n.headline)} · ${ago(n.created)}</span>
+    <pre>${esc(n.text)}${sent?'\n\n✔ '+esc(sent).replaceAll('\n','\n✔ '):''}${sk.length?'\n\n⏭ '+_t('omitidos')+': '+esc(sk.map(r=>r.target+' ('+r.note+')').join(', ')):''}${bad.length?'\n\n⚠ '+esc(bad.map(r=>chName(r.channel)+' '+(r.target||'')+': '+r.error).join('\n⚠ ')):''}</pre></div>
+    <span class="pill ${bad.length?'err':'ok'}">${real.length?_t('{a}/{b} enviados',{a:ok,b:real.length}):_t('sin canales')}</span>
+    ${bad.length?`<button class="btn" onclick="event.stopPropagation();retry(${n.id},this)">${_t('Reintentar fallidos')}</button>`:''}
+    <button class="btn sec" onclick="event.stopPropagation();resend(${n.id})">${_t('Reenviar')}</button></div>`}).join(''):`<div class="empty">${_t('Aún no hay notificaciones. Las subidas nuevas a Plex aparecerán aquí.')}</div>`}
+async function resend(id){if(!confirm(_t('Se reenviará por TODOS los canales activos y a TODOS los destinatarios (incluso quienes ya lo recibieron). ¿Continuar?')))return;await api('/api/resend/'+id,{method:'POST'});alert(_t('Reenviado'))}
+async function retry(id,b){b.disabled=true;b.textContent=_t('Reintentando…');try{const n=await api('/api/retry/'+id,{method:'POST'});
+  const bad=n.results.filter(r=>!r.ok&&!r.skipped);alert(bad.length?_t('Siguen fallando:')+'\n'+bad.map(r=>chName(r.channel)+' '+(r.target||'')+': '+r.error).join('\n'):_t('Listo: se envió a los destinos que habían fallado.'))}
+  catch(e){alert(_t('Error: {e}',{e:e.message}))}loadHist()}
 async function pollNow(){await api('/api/poll',{method:'POST'});status();loadHist()}
 
 async function logout(){await fetch('/api/logout',{method:'POST'});location.href='/login'}
 let sel=null;
 async function loadRecent(){window._rec=1;const r=await api('/api/recent');
-  $('#recent').innerHTML=r.map((g,i)=>`<div class="it" data-i="${i}"><div class="t"><b>${esc(g.title)}</b><span class="mut">${esc(g.library)} · ${g.kind==='movie'?'película':g.count+' episodio(s)'} · ${ago(g.added_at)}</span></div></div>`).join('');
+  $('#recent').innerHTML=r.map((g,i)=>`<div class="it" data-i="${i}"><div class="t"><b>${esc(g.title)}</b><span class="mut">${esc(g.library)} · ${g.kind==='movie'?_t('película'):_t('{n} episodio(s)',{n:g.count})} · ${ago(g.added_at)}</span></div></div>`).join('');
   $('#recent').querySelectorAll('.it').forEach(el=>el.onclick=()=>{$('#recent').querySelectorAll('.it').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');preview(r[el.dataset.i])})}
-async function preview(g){sel=g;$('#pvEmpty').style.display='';$('#pvEmpty').textContent='Generando…';$('#pv').style.display='none';
+async function preview(g){sel=g;$('#pvEmpty').style.display='';$('#pvEmpty').textContent=_t('Generando…');$('#pv').style.display='none';
   try{const p=await api('/api/preview',{method:'POST',body:JSON.stringify(g)});
   $('#pvCap').innerHTML=p.telegram;$('#pvImg').src=p.thumb?'/api/thumb?path='+encodeURIComponent(p.thumb):'';$('#pvImg').style.display=p.thumb?'':'none';
   window._mail=p.email;$('#mailTheme').value=p.email_theme;setMail();$('#pvEmpty').style.display='none';$('#pv').style.display='';$('#sendRes').textContent=''}
-  catch(e){$('#pvEmpty').textContent='Error: '+e.message}}
+  catch(e){$('#pvEmpty').textContent=_t('Error: {e}',{e:e.message})}}
 function pvTab(t){$('#pvTg').style.display=t==='tg'?'':'none';$('#pvMail').style.display=t==='mail'?'':'none';$('#mailTheme').style.display=t==='mail'?'':'none'}
 function setMail(){$('#pvMail').srcdoc=window._mail[$('#mailTheme').value]}
-function showRes(n){$('#sendRes').innerHTML=n.results.length?n.results.map(r=>r.skipped?`<span class="mut">${r.channel} ${esc(r.target)}: omitido (${esc(r.note)})</span>`:`<span class="${r.ok?'ok':'err'}">${r.test?'🧪 ':''}${r.channel} ${esc(r.target||'')}: ${r.ok?'OK':esc(r.error)}</span>`).join('<br>'):'No hay canales activos (actívalos en Configuración).';loadHist()}
-async function sendTest(chs){if(!sel){alert('Primero elige una subida de la lista');return}
+function showRes(n){$('#sendRes').innerHTML=n.results.length?n.results.map(r=>r.skipped?`<span class="mut">${chName(r.channel)} ${esc(r.target)}: ${_t('omitido ({n})',{n:esc(r.note)})}</span>`:`<span class="${r.ok?'ok':'err'}">${r.test?'🧪 ':''}${chName(r.channel)} ${esc(r.target||'')}: ${r.ok?'OK':esc(r.error)}</span>`).join('<br>'):_t('No hay canales activos (actívalos en Configuración).');loadHist()}
+async function sendTest(chs){if(!sel){alert(_t('Primero elige una subida de la lista'));return}
   const chat=$('#tChat').value.trim(),mail=$('#tMail').value.trim();
-  if(chs.includes('telegram')&&!/^(-?\d{3,20}|@[A-Za-z][A-Za-z0-9_]{4,31})$/.test(chat)){alert('Escribe un chat ID de Telegram válido');$('#tChat').focus();return}
-  if(chs.includes('email')&&!/^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/.test(mail)){alert('Escribe un correo válido');$('#tMail').focus();return}
-  $('#sendRes').textContent='Enviando prueba…';
+  if(chs.includes('telegram')&&!/^(-?\d{3,20}|@[A-Za-z][A-Za-z0-9_]{4,31})$/.test(chat)){alert(_t('Escribe un chat ID de Telegram válido'));$('#tChat').focus();return}
+  if(chs.includes('email')&&!/^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/.test(mail)){alert(_t('Escribe un correo válido'));$('#tMail').focus();return}
+  $('#sendRes').textContent=_t('Enviando prueba…');
   try{showRes(await api('/api/send',{method:'POST',body:JSON.stringify({...sel,test:{channels:chs,chat_id:chat,email:mail}})}))}
   catch(e){$('#sendRes').innerHTML=`<span class="err">${esc(e.message)}</span>`}}
 async function sendSel(ch){if(!sel)return;
-  const what={telegram:'al/los chat(s) de Telegram configurados',apprise:'a todas las URLs de Apprise configuradas',email:'a TODOS los destinatarios de correo configurados (usuarios de Plex marcados y direcciones adicionales)'}[ch]||'por TODOS los canales activos, a todos los destinatarios';
-  if(!confirm('Esto NO es una prueba: se enviará '+what+'. ¿Continuar?'))return;
-  $('#sendRes').textContent='Enviando…';
+  const what=_t({telegram:'al/los chat(s) de Telegram configurados',apprise:'a todas las URLs de Apprise configuradas',email:'a TODOS los destinatarios de correo configurados (usuarios de Plex marcados y direcciones adicionales)'}[ch]||'por TODOS los canales activos, a todos los destinatarios');
+  if(!confirm(_t('Esto NO es una prueba: se enviará {w}. ¿Continuar?',{w:what})))return;
+  $('#sendRes').textContent=_t('Enviando…');
   try{const n=await api('/api/send',{method:'POST',body:JSON.stringify({...sel,channel:ch})});
   showRes(n)}
   catch(e){$('#sendRes').innerHTML=`<span class="err">${esc(e.message)}</span>`}}
 
 let cfg;
 async function loadCfg(){cfg=await api('/api/settings');const secs=await api('/api/sections');
-  $('#sections').innerHTML=secs.map(s=>`<label class="chk"><input type="checkbox" class="sec" value="${s.key}" ${cfg.sections.includes(s.key)?'checked':''}> ${esc(s.title)} <span class="mut">(${s.type==='movie'?'películas':'series'})</span></label>`).join('');
+  $('#sections').innerHTML=secs.map(s=>`<label class="chk"><input type="checkbox" class="sec" value="${s.key}" ${cfg.sections.includes(s.key)?'checked':''}> ${esc(s.title)} <span class="mut">(${_t(s.type==='movie'?'películas':'series')})</span></label>`).join('');
   document.querySelectorAll('#cfg [id]').forEach(el=>{if(!['INPUT','SELECT','TEXTAREA'].includes(el.tagName))return;const [a,b]=el.id.split('.');const v=b?cfg[a][b]:cfg[a];
     if(el.type==='checkbox')el.checked=!!v;else el.value=v??''});
   $('#tChat').value=(cfg.test||{}).chat_id||'';$('#tMail').value=(cfg.test||{}).email||'';
   secMap=Object.fromEntries(secs.map(s=>[s.key,s.title]));excl=JSON.parse(JSON.stringify(cfg.email.user_excludes||{}));loadUsers(false)}
 let secMap={};
-async function loadUsers(refresh){const box=$('#plexUsers');if(refresh)box.innerHTML='<div class="empty">Consultando plex.tv…</div>';
+async function loadUsers(refresh){const box=$('#plexUsers');if(refresh)box.innerHTML=`<div class="empty">${_t('Consultando plex.tv…')}</div>`;
   try{const r=await api('/api/plex-users'+(refresh?'?refresh=1':''));const sel=new Set(cfg.email.plex_users||[]);
-  $('#puUpd').innerHTML=r.updated?`<span class="mut">· actualizada ${ago(r.updated)}</span>`:'';
+  $('#puUpd').innerHTML=r.updated?`<span class="mut">${_t('· actualizada {v}',{v:ago(r.updated)})}</span>`:'';
   if(r.error&&!r.users.length){box.innerHTML=`<div class="empty err">${esc(r.error)}</div>`;return}
   if(r.error)$('#puUpd').innerHTML+=` <span class="err">· ${esc(r.error)}</span>`;
   box.innerHTML=r.users.length?r.users.map(u=>{const ex=new Set(excl[u.id]||[]);const libs=Object.entries(secMap).map(([k,t])=>(u.all_libraries||u.sections.includes(k))
-      ?`<button type="button" class="chip ${ex.has(k)?'ex':''}" data-u="${u.id}" data-k="${k}" title="${ex.has(k)?'Excluida: no recibe correos de esta biblioteca. Clic para incluir':'Recibe correos de esta biblioteca. Clic para excluir'}" onclick="toggleEx(event,this)">${ex.has(k)?'🔕 ':''}${esc(t)}</button>`
-      :`<span class="chip off" title="No tiene acceso a esta biblioteca">${esc(t)}</span>`).join('');
+      ?`<button type="button" class="chip ${ex.has(k)?'ex':''}" data-u="${u.id}" data-k="${k}" title="${_t(ex.has(k)?'Excluida: no recibe correos de esta biblioteca. Clic para incluir':'Recibe correos de esta biblioteca. Clic para excluir')}" onclick="toggleEx(event,this)">${ex.has(k)?'🔕 ':''}${esc(t)}</button>`
+      :`<span class="chip off" title="${_t('No tiene acceso a esta biblioteca')}">${esc(t)}</span>`).join('');
     return `<label class="it pu"><input type="checkbox" class="puc" value="${u.id}" ${sel.has(u.id)?'checked':''} ${u.email?'':'disabled'} style="width:auto">
-    ${u.thumb?`<img src="${esc(u.thumb)}" alt="">`:'<img alt="">'}<div class="t"><b>${esc(u.username)}${u.pending?' <span class="pill">invitación pendiente</span>':''}</b>
-    <span class="mut">${u.email?esc(u.email):'<span class="err">sin correo en Plex</span>'}</span><div>${libs}</div></div></label>`}).join(''):'<div class="empty">No compartes el servidor con nadie.</div>'}
+    ${u.thumb?`<img src="${esc(u.thumb)}" alt="">`:'<img alt="">'}<div class="t"><b>${esc(u.username)}${u.pending?` <span class="pill">${_t('invitación pendiente')}</span>`:''}</b>
+    <span class="mut">${u.email?esc(u.email):`<span class="err">${_t('sin correo en Plex')}</span>`}</span><div>${libs}</div></div></label>`}).join(''):`<div class="empty">${_t('No compartes el servidor con nadie.')}</div>`}
   catch(e){box.innerHTML=`<div class="empty err">${esc(e.message)}</div>`}}
 let excl={};
 function toggleEx(ev,b){ev.preventDefault();ev.stopPropagation();const u=b.dataset.u,k=b.dataset.k,set=new Set(excl[u]||[]);
   set.has(k)?set.delete(k):set.add(k);excl[u]=[...set];if(!excl[u].length)delete excl[u];
   const on=set.has(k),t=secMap[k];b.classList.toggle('ex',on);b.textContent=(on?'🔕 ':'')+t;
-  b.title=on?'Excluida: no recibe correos de esta biblioteca. Clic para incluir':'Recibe correos de esta biblioteca. Clic para excluir';
-  $('#saved').textContent='Cambios sin guardar';}
+  b.title=_t(on?'Excluida: no recibe correos de esta biblioteca. Clic para incluir':'Recibe correos de esta biblioteca. Clic para excluir');
+  $('#saved').textContent=_t('Cambios sin guardar');}
 function markUsers(v){document.querySelectorAll('.puc:not(:disabled)').forEach(x=>x.checked=v)}
 async function saveCfg(){const out={};document.querySelectorAll('#cfg [id]').forEach(el=>{if(!['INPUT','SELECT','TEXTAREA'].includes(el.tagName))return;const [a,b]=el.id.split('.');
     let v=el.type==='checkbox'?el.checked:(el.type==='number'?Number(el.value):el.value);if(b){out[a]=out[a]||{};out[a][b]=v}else out[a]=v});
   out.sections=[...document.querySelectorAll('#sections .sec:checked')].map(x=>x.value);
   out.email.plex_users=[...document.querySelectorAll('.puc:checked')].map(x=>x.value);
   out.email.user_excludes=excl;
-  cfg=await api('/api/settings',{method:'PUT',body:JSON.stringify(out)});$('#saved').textContent='Guardado ✓';setTimeout(()=>$('#saved').textContent='',2500);status()}
+  cfg=await api('/api/settings',{method:'PUT',body:JSON.stringify(out)});$('#saved').textContent=_t('Guardado ✓');setTimeout(()=>$('#saved').textContent='',2500);status()}
+async function setLanguage(l){if(l===LANG)return;try{await api('/api/settings',{method:'PUT',body:JSON.stringify({language:l})});setLang(l);location.reload()}catch(e){alert(e.message)}}
+function applyLang(l){setLang(l);document.querySelectorAll('.lang button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===LANG));tStatic()}
+applyLang(LANG);fetch('/health').then(r=>r.json()).then(j=>{if(j.language&&j.language!==LANG){applyLang(j.language);status();loadHist();if(cfg)loadCfg()}}).catch(()=>{});
 status();loadHist();loadCfg();setInterval(()=>{status();loadHist()},15000);
 </script>
 </body>

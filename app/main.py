@@ -17,6 +17,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 
 from . import analyzer, db, render
+from .i18n import _, set_lang
 from .plex import PlexClient
 from .worker import Worker
 
@@ -47,7 +48,7 @@ app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 # ---------------- autenticación: login web con cookie de sesión firmada ----------------
 SESSION_COOKIE = "pn_session"
-PUBLIC_PATHS = {"/health", "/login", "/api/login", "/favicon.ico"}
+PUBLIC_PATHS = {"/health", "/login", "/api/login", "/favicon.ico", "/i18n.js"}
 _fails: dict[str, list[float]] = {}   # ip -> intentos fallidos recientes
 MAX_FAILS, LOCK_SECONDS = 5, 300
 
@@ -95,11 +96,12 @@ def _client_ip(request: Request) -> str:
 @app.middleware("http")
 async def auth(request: Request, call_next):
     path = request.url.path
+    set_lang(db.get_settings().get("language"))
     if (not APP_PASSWORD or path in PUBLIC_PATHS
             or _valid_session(request.cookies.get(SESSION_COOKIE)) or _basic_ok(request)):
         return await call_next(request)
     if path.startswith("/api/"):
-        return JSONResponse({"detail": "no autenticado"}, status_code=401)
+        return JSONResponse({"detail": _("no autenticado")}, status_code=401)
     return RedirectResponse("/login", status_code=303)
 
 
@@ -117,16 +119,16 @@ async def login(request: Request, body: dict):
     _fails[ip] = recent
     if len(recent) >= MAX_FAILS:
         wait = int(LOCK_SECONDS - (now - recent[0]))
-        raise HTTPException(429, f"Demasiados intentos. Espera {max(1, wait // 60)} min.")
+        raise HTTPException(429, _("Demasiados intentos. Espera {n} min.", n=max(1, wait // 60)))
     user, pw = str(body.get("username", "")), str(body.get("password", ""))
     if not (secrets.compare_digest(user, APP_USER) and secrets.compare_digest(pw, APP_PASSWORD)):
         _fails[ip].append(now)
         logging.warning("login fallido desde %s (usuario %r)", ip, user[:40])
         await asyncio.sleep(1)  # frena intentos automáticos
         left = MAX_FAILS - len(_fails[ip])
-        raise HTTPException(401, "Usuario o contraseña incorrectos"
-                            + (" (queda 1 intento)" if left == 1 else f" (quedan {left} intentos)" if left == 2
-                               else ". Acceso bloqueado por 5 min" if left == 0 else ""))
+        raise HTTPException(401, _("Usuario o contraseña incorrectos")
+                            + (_(" (queda 1 intento)") if left == 1 else _(" (quedan {n} intentos)", n=left) if left == 2
+                               else _(". Acceso bloqueado por 5 min") if left == 0 else ""))
     _fails.pop(ip, None)
     remember = bool(body.get("remember"))
     max_age = 30 * 86400 if remember else 12 * 3600
@@ -146,7 +148,13 @@ async def logout():
 
 @app.get("/health")
 async def health():
-    return {"ok": True}
+    return {"ok": True, "language": db.get_settings().get("language", "es")}
+
+
+@app.get("/i18n.js")
+async def i18n_js():
+    return FileResponse(os.path.join(STATIC, "i18n.js"), media_type="text/javascript",
+                        headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/")
@@ -194,10 +202,13 @@ async def put_settings(body: dict):
                 if sec == k and v.get(f) == MASK:
                     v[f] = cur[k].get(f, "")
         out[k] = v
+    if "language" in out and out["language"] not in ("es", "en"):
+        raise HTTPException(400, _("idioma inválido"))
     for k in ("poll_seconds", "quiet_seconds", "max_episode_list"):
         if k in out:
             out[k] = max(10 if k != "max_episode_list" else 1, int(out[k]))
     db.save_settings(out)
+    set_lang(db.get_settings().get("language"))
     worker.wake()
     return _masked(db.get_settings())
 
@@ -217,8 +228,8 @@ async def plex_users(refresh: bool = False):
             users = await worker.refresh_users()
         except Exception as e:  # noqa: BLE001
             logging.warning("no se pudo consultar plex.tv: %s: %s", type(e).__name__, e)
-            error = f"No se pudo conectar con plex.tv ({type(e).__name__}: {e or 'sin detalle'}). " \
-                    "Revisa que el contenedor tenga salida a internet / DNS."
+            error = _("No se pudo conectar con plex.tv ({e}). Revisa que el contenedor tenga salida a internet / DNS.",
+                      e=f"{type(e).__name__}: {e or _('sin detalle')}")
     return {"users": users, "updated": db.get_state("plex_users_at"), "error": error}
 
 
@@ -261,7 +272,7 @@ async def _event_from(body: dict) -> dict:
         show_key = body["group"].split(":")[1]
         ev = await analyzer.build_show_event(plex, show_key, body["items"], settings)
     if not ev:
-        raise HTTPException(404, "no se pudo armar el evento")
+        raise HTTPException(404, _("no se pudo armar el evento"))
     return ev
 
 
@@ -293,11 +304,11 @@ async def send(body: dict):
     mail = str(test.get("email") or "").strip()
     channels = [c for c in test.get("channels", []) if c in ("telegram", "email")]
     if "telegram" in channels and not TG_CHAT.match(chat):
-        raise HTTPException(400, "Chat ID de Telegram inválido (ej. 123456789, -1001234567890 o @canal)")
+        raise HTTPException(400, _("Chat ID de Telegram inválido (ej. 123456789, -1001234567890 o @canal)"))
     if "email" in channels and not EMAIL.match(mail):
-        raise HTTPException(400, "Correo de prueba inválido")
+        raise HTTPException(400, _("Correo de prueba inválido"))
     if not channels:
-        raise HTTPException(400, "Elige al menos un destino de prueba")
+        raise HTTPException(400, _("Elige al menos un destino de prueba"))
     # recordar los destinos de prueba
     db.save_settings({"test": {"chat_id": chat, "email": mail}})
 
@@ -307,7 +318,7 @@ async def send(body: dict):
         if ch == "telegram":
             if not st["telegram"].get("bot_token"):
                 results.append({"channel": "telegram", "target": chat, "ok": False,
-                                "error": "falta el bot token en Configuración → Telegram"})
+                                "error": _("falta el bot token en Configuración → Telegram")})
                 continue
             st["telegram"]["chat_ids"] = chat
         else:

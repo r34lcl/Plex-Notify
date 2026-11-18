@@ -7,6 +7,7 @@ import logging
 import time
 
 from . import analyzer, db, notifiers, render
+from .i18n import set_lang
 from .plex import PlexClient
 
 log = logging.getLogger("plex-notify")
@@ -106,6 +107,7 @@ class Worker:
     async def run(self):
         while True:
             settings = db.get_settings()
+            set_lang(settings.get("language"))
             try:
                 if time.time() - (db.get_state("plex_users_at", 0) or 0) > 6 * 3600:
                     await self.refresh_users()

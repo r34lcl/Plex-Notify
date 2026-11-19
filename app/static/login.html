@@ -7,7 +7,7 @@
 <style>
 :root{--bg:#141414;--panel:#1f1f1f;--panel2:#2a2a2a;--line:#333;--fg:#e8e8e8;--mut:#9a9a9a;--acc:#e5a00d;--err:#ef5350}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;
   background:radial-gradient(circle at 50% 0%,#2a2210 0%,var(--bg) 55%);color:var(--fg);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
 .box{width:100%;max-width:360px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 26px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
 h1{margin:0 0 4px;font-size:22px;color:var(--acc);text-align:center}
@@ -20,6 +20,7 @@ input:focus{border-color:var(--acc)}
 button.go{width:100%;margin-top:20px;background:var(--acc);color:#111;border:0;border-radius:8px;padding:12px;font-weight:700;font-size:15px;cursor:pointer}
 button.go:disabled{opacity:.6;cursor:wait}
 #err{min-height:20px;margin-top:12px;color:var(--err);font-size:13px;text-align:center}
+footer{text-align:center;font-size:12.5px;color:var(--mut);padding-top:24px}footer a{color:inherit;text-decoration:none;font-weight:600}footer a:hover{color:var(--fg);text-decoration:underline}
 </style>
 </head>
 <body>
@@ -35,10 +36,11 @@ button.go:disabled{opacity:.6;cursor:wait}
   <button class="go" id="go" type="submit" data-t>Entrar</button>
   <div id="err" role="alert"></div>
 </form>
+<footer>Plex Notify <span id="ver"></span> · <a href="https://kqk.cl" target="_blank" rel="noopener">KqK.cl</a></footer>
 <script src="/i18n.js"></script>
 <script>
 const $=s=>document.querySelector(s);
-tStatic();fetch('/health').then(r=>r.json()).then(j=>{if(j.language&&j.language!==LANG){setLang(j.language);tStatic()}}).catch(()=>{});
+tStatic();fetch('/health').then(r=>r.json()).then(j=>{if(j.version)$('#ver').textContent='v'+j.version;if(j.language&&j.language!==LANG){setLang(j.language);tStatic()}}).catch(()=>{});
 try{$('#u').value=localStorage.getItem('pn.user')||'';$('#r').checked=localStorage.getItem('pn.remember')==='1';if($('#u').value)$('#p').focus()}catch(e){}
 $('#show').onclick=()=>{const t=$('#p').type==='password';$('#p').type=t?'text':'password';$('#show').textContent=_t(t?'Ocultar':'Mostrar')};
 $('#f').onsubmit=async ev=>{ev.preventDefault();$('#err').textContent='';$('#go').disabled=true;$('#go').textContent=_t('Entrando…');

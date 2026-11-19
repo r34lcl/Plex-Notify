@@ -18,6 +18,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Resp
 
 from . import analyzer, db, render
 from .i18n import _, set_lang
+from .version import VERSION
 from .plex import PlexClient
 from .worker import Worker
 
@@ -148,7 +149,7 @@ async def logout():
 
 @app.get("/health")
 async def health():
-    return {"ok": True, "language": db.get_settings().get("language", "es")}
+    return {"ok": True, "version": VERSION, "language": db.get_settings().get("language", "es")}
 
 
 @app.get("/i18n.js")

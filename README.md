@@ -6,6 +6,32 @@ Sends a notification through **Telegram**, **email** or other services (via [App
 
 It started as a replacement for Tautulli's notifications. It understands what was actually added: a single episode is announced as a single episode, not as a "complete series".
 
+## Screenshots
+
+| Telegram | Email (dark theme) |
+|---|---|
+| ![Telegram](docs/screenshots/telegram.png) | ![Email (dark theme)](docs/screenshots/email-dark.png) |
+
+<details>
+<summary>More screenshots of the web UI</summary>
+
+**History**
+![History](docs/screenshots/history.png)
+
+**Test: preview with real uploads and test-only destinations**
+![Test: preview with real uploads and test-only destinations](docs/screenshots/test.png)
+
+**Settings**
+![Settings](docs/screenshots/settings.png)
+
+**Email recipients: Plex users, library access and per-user exclusions**
+![Email recipients: Plex users, library access and per-user exclusions](docs/screenshots/settings-email-users.png)
+
+**Sign-in**
+![Sign-in](docs/screenshots/login.png)
+
+</details>
+
 ## What it detects
 
 It waits a few minutes without news from the same series (5 by default) and then sends **a single message** with everything that arrived:
@@ -153,3 +179,5 @@ Plex Notify is free software under the [Apache License 2.0](LICENSE). You can us
 It is provided "as is", without warranty. See the full text in `LICENSE`.
 
 Plex Notify is not affiliated with Plex Inc. "Plex" is a trademark of its respective owners.
+
+The screenshots use sample data (server, users and history); posters and titles belong to their respective owners.

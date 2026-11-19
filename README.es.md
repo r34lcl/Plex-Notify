@@ -6,6 +6,32 @@ Avisa por **Telegram**, **correo** u otros servicios (vía [Apprise](https://git
 
 Nació como reemplazo de las notificaciones de Tautulli: entiende qué se subió realmente. Un capítulo suelto se anuncia como un capítulo, no como "serie completa".
 
+## Capturas
+
+| Telegram | Correo (tema oscuro) |
+|---|---|
+| ![Telegram](docs/screenshots/telegram.png) | ![Correo (tema oscuro)](docs/screenshots/email-dark.png) |
+
+<details>
+<summary>Más capturas de la interfaz web</summary>
+
+**Historial**
+![Historial](docs/screenshots/history.png)
+
+**Probar: vista previa con subidas reales y destinos solo para pruebas**
+![Probar: vista previa con subidas reales y destinos solo para pruebas](docs/screenshots/test.png)
+
+**Configuración**
+![Configuración](docs/screenshots/settings.png)
+
+**Destinatarios de correo: usuarios de Plex, acceso por biblioteca y exclusiones por usuario**
+![Destinatarios de correo: usuarios de Plex, acceso por biblioteca y exclusiones por usuario](docs/screenshots/settings-email-users.png)
+
+**Inicio de sesión**
+![Inicio de sesión](docs/screenshots/login.png)
+
+</details>
+
 ## Qué detecta
 
 Espera unos minutos sin novedades de una misma serie (por defecto 5) y recién ahí manda **un solo mensaje** con todo lo que llegó:
@@ -153,3 +179,5 @@ Plex Notify es software libre bajo la [Licencia Apache 2.0](LICENSE). Puedes usa
 Se entrega «tal cual», sin garantías. Ver el texto completo en `LICENSE`.
 
 Plex Notify no está afiliado a Plex Inc. "Plex" es una marca de sus respectivos dueños.
+
+Las capturas usan datos de ejemplo (servidor, usuarios e historial); los pósters y títulos pertenecen a sus respectivos dueños.

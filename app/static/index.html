@@ -22,10 +22,11 @@ textarea{min-height:70px;font-family:ui-monospace,monospace;font-size:12px}
 .chk{display:flex;align-items:center;gap:8px;color:var(--fg);font-size:14px;margin:6px 0}.chk input{width:auto}
 .list{display:flex;flex-direction:column;gap:6px}
 .it{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;background:var(--panel2);cursor:pointer;border:1px solid transparent}
-.it:hover,.it.sel{border-color:var(--acc)}.it .t{flex:1;min-width:0}.it .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it.sel{border-color:var(--acc)}@media(hover:hover){.it:hover{border-color:var(--acc)}button.chip:hover{border-color:var(--acc)}}.it .t{flex:1;min-width:0}.it .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mut{color:var(--mut);font-size:12px}.pill{font-size:11px;padding:2px 8px;border-radius:99px;background:#333;white-space:nowrap}
 .ok{color:var(--ok)}.err{color:var(--err)}
-.grid2{display:grid;grid-template-columns:minmax(260px,360px) 1fr;gap:14px}@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.grid2{display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:14px}.grid2>.card{min-width:0}
+@media(max-width:800px){.grid2{grid-template-columns:minmax(0,1fr)}#recent{max-height:52vh;overflow-y:auto;overscroll-behavior:contain;padding-right:2px}}
 .tg{background:#0e1621;border-radius:10px;padding:14px;display:flex;justify-content:flex-start}
 .bubble{background:#182533;color:#f5f5f5;border-radius:12px;max-width:420px;overflow:hidden;font-size:14px}
 .bubble img{width:100%;display:block;max-height:420px;object-fit:cover}.bubble .c{padding:8px 12px;white-space:pre-wrap;word-wrap:break-word}
@@ -34,9 +35,10 @@ textarea{min-height:70px;font-family:ui-monospace,monospace;font-size:12px}
 iframe{width:100%;height:560px;border:0;border-radius:8px;background:#f2f2f2}
 .hist .it{cursor:default;align-items:flex-start}.hist pre{white-space:pre-wrap;margin:6px 0 0;font:12px/1.4 ui-monospace,monospace;color:#ccc;display:none}
 .hist .it.open pre{display:block}
+.hist pre,.it .t b,.mut{overflow-wrap:anywhere}
 .tabs2{display:flex;gap:6px;margin:10px 0}
 .pu{cursor:pointer}.pu img{width:32px;height:32px;border-radius:50%;background:#333}.chip{font-size:11px;padding:1px 7px;border-radius:99px;background:#333;margin:2px 3px 0 0;display:inline-block}.chip.off{opacity:.35;text-decoration:line-through}
-button.chip{border:1px solid #4a4a4a;color:var(--fg);cursor:pointer;font:inherit;font-size:11px}button.chip:hover{border-color:var(--acc)}
+button.chip{border:1px solid #4a4a4a;color:var(--fg);cursor:pointer;font:inherit;font-size:11px}
 button.chip.ex{background:transparent;color:var(--mut);border-style:dashed;text-decoration:line-through}
 .testbox{border:1px dashed var(--acc);border-radius:10px;padding:12px;margin-bottom:14px;background:rgba(229,160,13,.06)}
 .btn.danger{border-color:#6b3a3a}.btn.danger:hover{border-color:var(--err)}
@@ -47,6 +49,24 @@ button.chip.ex{background:transparent;color:var(--mut);border-style:dashed;text-
 .lang button[aria-pressed=true]{background:var(--acc);color:#111}
 .lang button:not([aria-pressed=true]):hover{color:var(--fg)}
 .lang button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+/* móvil: cabecera en filas fijas, objetivos táctiles más grandes, sin desbordes */
+@media(max-width:640px){
+  header{padding:10px 12px;gap:8px 10px}
+  header h1{flex:1;font-size:17px;order:0}
+  header .lang{order:1}header>.btn{order:2;padding:8px 12px}
+  nav{order:3;width:100%;gap:4px}nav button{flex:1;min-height:40px;padding:8px 4px;background:var(--bg)}
+  #st{order:4;width:100%;margin:0;line-height:1.5}
+  .lang button{min-height:32px;padding:4px 10px}
+  main{padding:12px 10px}.card{padding:12px;border-radius:9px}
+  input,select,textarea{font-size:16px}
+  .btn{min-height:40px}
+  .hist .it{flex-wrap:wrap;row-gap:8px}.hist .it .t{flex-basis:100%}
+  .hist .it .pill{margin-right:auto}
+  .tabs2 .btn{flex:1}.tabs2 select{flex-basis:100%}.tabs2{flex-wrap:wrap}
+  .testbox{padding:10px}.testbox>div:first-child{flex-direction:column;align-items:flex-start!important;gap:2px}
+  .testbox .btn{flex:1 1 100%}
+  iframe{height:520px}
+}
 </style>
 </head>
 <body>
@@ -64,7 +84,7 @@ button.chip.ex{background:transparent;color:var(--mut);border-style:dashed;text-
 <main>
 <section id="hist" class="on">
   <div class="card" id="pendingCard" style="display:none"><h2 data-t>⏳ En espera (agrupando la subida)</h2><div id="pending" class="list"></div></div>
-  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2 data-t>Notificaciones enviadas</h2>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h2 data-t style="margin:0">Notificaciones enviadas</h2>
     <button class="btn sec" onclick="pollNow()" data-t>Revisar Plex ahora</button></div>
     <div id="hlist" class="list hist"></div></div>
 </section>
@@ -88,7 +108,7 @@ button.chip.ex{background:transparent;color:var(--mut);border-style:dashed;text-
       </div>
       <div id="pvEmpty" class="empty" data-t>Selecciona una subida.</div>
       <div id="pv" style="display:none">
-        <div class="tabs2"><button class="btn sec" onclick="pvTab('tg')">Telegram</button><button class="btn sec" onclick="pvTab('mail')">Correo</button>
+        <div class="tabs2"><button class="btn sec" onclick="pvTab('tg')">Telegram</button><button class="btn sec" onclick="pvTab('mail')" data-t>Correo</button>
           <select id="mailTheme" style="width:auto;display:none" onchange="setMail()"><option value="dark" data-t>Oscuro</option><option value="light" data-t>Claro</option><option value="auto" data-t>Automático</option></select></div>
         <div id="pvTg" class="tg"><div class="bubble"><img id="pvImg" alt=""><div class="c" id="pvCap"></div><div class="kb">▶ <span data-t>Ver en Plex</span></div></div></div>
         <iframe id="pvMail" style="display:none"></iframe>
@@ -183,7 +203,8 @@ async function loadRecent(){window._rec=1;const r=await api('/api/recent');
 async function preview(g){sel=g;$('#pvEmpty').style.display='';$('#pvEmpty').textContent=_t('Generando…');$('#pv').style.display='none';
   try{const p=await api('/api/preview',{method:'POST',body:JSON.stringify(g)});
   $('#pvCap').innerHTML=p.telegram;$('#pvImg').src=p.thumb?'/api/thumb?path='+encodeURIComponent(p.thumb):'';$('#pvImg').style.display=p.thumb?'':'none';
-  window._mail=p.email;$('#mailTheme').value=p.email_theme;setMail();$('#pvEmpty').style.display='none';$('#pv').style.display='';$('#sendRes').textContent=''}
+  window._mail=p.email;$('#mailTheme').value=p.email_theme;setMail();$('#pvEmpty').style.display='none';$('#pv').style.display='';$('#sendRes').textContent='';
+  if(matchMedia('(max-width:800px)').matches)$('#pv').closest('.card').scrollIntoView({block:'start'})}
   catch(e){$('#pvEmpty').textContent=_t('Error: {e}',{e:e.message})}}
 function pvTab(t){$('#pvTg').style.display=t==='tg'?'':'none';$('#pvMail').style.display=t==='mail'?'':'none';$('#mailTheme').style.display=t==='mail'?'':'none'}
 function setMail(){$('#pvMail').srcdoc=window._mail[$('#mailTheme').value]}
